@@ -14,7 +14,13 @@ const uri = `mongodb+srv://${process.env.BITIT_MONGO_USER_DB}:${process.env.BITI
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 async function run(){
-  
+  const postCollection = client.db(process.env.BITIT_MONGO_USER_DB).collection('posts');
+
+  app.post('/posts', async(req, res) =>{
+    const postData = req.body;
+    const result = await postCollection.insertOne(postData);
+    res.send(result);
+  })
 }
 run().catch(err => console.error(err));
 
