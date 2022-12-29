@@ -16,6 +16,38 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run(){
   const postCollection = client.db(process.env.BITIT_MONGO_USER_DB).collection('posts');
   const commentCollection = client.db(process.env.BITIT_MONGO_USER_DB).collection('comments');
+  const usersCollection = client.db(process.env.BITIT_MONGO_USER_DB).collection('users');
+
+  app.post('/users', async(req, res) =>{
+    const user = req.body;
+    const query = {email: user?.email}
+    const alreadyExist = await usersCollection.find(query).toArray();
+    if(alreadyExist.length){
+      return res.send({acknowledged: false})
+    }
+    const result = await usersCollection.insertOne(user);
+    res.send(result);
+  })
+
+  app.get('/users', async(req, res) =>{
+    const email = req.query.email;
+    const query = {email: email};
+    const result = await usersCollection.findOne(query);
+    res.send(result);
+  })
+
+  app.put('/users', async(req, res) =>{
+    const data = req.body;
+    const filter = {email: data?.email};
+    const updatedDoc = {
+      $set: {
+        address: data?.address,
+        university: data?.university
+      }
+    }
+    const result = await usersCollection.updateOne(filter, updatedDoc);
+    res.send(result);
+  })
 
   app.post('/posts', async(req, res) =>{
     const postData = req.body;
