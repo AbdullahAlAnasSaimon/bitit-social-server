@@ -44,10 +44,14 @@ async function run() {
     })
 
     app.put('/users', async (req, res) => {
+      const email = req.query.email;
       const data = req.body;
-      const filter = { email: data?.email };
+      const filter = { email: email };
+      const queryResult = await usersCollection.findOne(filter);
+      console.log(queryResult);
       const updatedDoc = {
         $set: {
+          email: data?.email,
           address: data?.address,
           university: data?.university
         }
@@ -65,6 +69,19 @@ async function run() {
     app.get('/posts', async (req, res) => {
       const query = {};
       const result = await postCollection.find(query).sort({ _id: - 1 }).toArray();
+      res.send(result);
+    })
+
+    app.get('/limited-posts', async (req, res) => {
+      const query = {};
+      const result = await postCollection.find(query).sort({ post_like: - 1 }).toArray();
+      res.send(result);
+    })
+
+    app.get('/post/:id', async(req, res) =>{
+      const id = req.params.id;
+      const query = {_id: ObjectId(id)};
+      const result = await postCollection.findOne(query);
       res.send(result);
     })
 
