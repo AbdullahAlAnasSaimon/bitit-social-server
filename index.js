@@ -14,9 +14,10 @@ const uri = `mongodb+srv://${process.env.BITIT_MONGO_USER_DB}:${process.env.BITI
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 async function run(){
-  const postCollection = client.db(process.env.BITIT_MONGO_USER_DB).collection('posts');
-  const commentCollection = client.db(process.env.BITIT_MONGO_USER_DB).collection('comments');
-  const usersCollection = client.db(process.env.BITIT_MONGO_USER_DB).collection('users');
+  const postCollection = client.db("bitit_DB_user").collection('posts');
+  const commentCollection = client.db("bitit_DB_user").collection('comments');
+  const usersCollection = client.db("bitit_DB_user").collection('users');
+
 
   app.post('/users', async(req, res) =>{
     const user = req.body;
@@ -64,6 +65,27 @@ async function run(){
   app.post('/comment', async(req, res) =>{
     const comment = req.body;
     const result = await commentCollection.insertOne(comment);
+    res.send(result);
+  })
+
+
+  app.get('/comment', async(req, res) =>{
+    const postId = req.query.post_id;
+    const query = {post_id: postId};
+    const result = await commentCollection.find(query).toArray();
+    res.send(result);
+  })
+
+  app.put('/post-like/:id', async(req, res) =>{
+    const id = req.params.id;
+    const count = req.body;
+    const filter = {_id: ObjectId(id)};
+    const updatedDoc = {
+      $set: {
+        post_like: count?.likeReactCount
+      }
+    }
+    const result = await postCollection.updateOne(filter, updatedDoc);
     res.send(result);
   })
 
