@@ -126,6 +126,12 @@ async function run() {
       res.send(result);
     })
 
+    app.get('/friends', async(req, res) =>{
+      const query = {};
+      const result = await usersCollection.find(query).toArray();
+      res.send(result);
+    })
+
   }
   finally {
 
